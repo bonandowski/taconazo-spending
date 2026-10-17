@@ -89,14 +89,16 @@ const ACTIONS = {
     player.active = false;
   },
 
-  addMatch(state, { date, payerId, playerIds }) {
+  addMatch(state, { date, payerId, playerIds, amount }) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(String(date))) throw new HttpError(400, 'Data non valida');
+    const value = amount === undefined || amount === null || amount === '' ? state.cost : Number(amount);
+    if (!Number.isFinite(value) || value <= 0 || value > 10000) throw new HttpError(400, 'Importo non valido');
     const known = new Set(state.players.map((p) => p.id));
     const players = [...new Set(Array.isArray(playerIds) ? playerIds : [])];
     if (players.length === 0) throw new HttpError(400, 'Seleziona chi ha giocato');
     if (!players.every((id) => known.has(id))) throw new HttpError(400, 'Giocatore sconosciuto');
     if (!known.has(payerId)) throw new HttpError(400, 'Seleziona chi ha pagato');
-    state.matches.push({ id: newId(), date, payerId, playerIds: players });
+    state.matches.push({ id: newId(), date, payerId, playerIds: players, amount: Math.round(value * 100) / 100 });
   },
 
   deleteMatch(state, { id }) {

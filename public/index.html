@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b2f6b">
   <title>Taconazo · Cassa partite</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%230b2f6b'/%3E%3Crect y='36' width='100' height='28' fill='%23f6b800'/%3E%3C/svg%3E">
@@ -23,19 +23,21 @@
       --display: 'Bebas Neue', Impact, 'Haettenschweiler', 'Arial Narrow Bold', sans-serif;
     }
     * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
     body {
       margin: 0;
+      -webkit-tap-highlight-color: transparent;
       background: var(--blue-deep);
       color: var(--white);
       font: 16px/1.4 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     }
     .band { height: 22px; background: linear-gradient(var(--blue) 0 28%, var(--gold) 28% 72%, var(--blue) 72%); }
-    header { background: var(--blue); padding: 16px 16px 14px; }
+    header { background: var(--blue); padding: 16px max(16px, env(safe-area-inset-right)) 14px max(16px, env(safe-area-inset-left)); }
     .brand { max-width: 720px; margin: 0 auto; display: flex; align-items: center; gap: 14px; }
     .brand svg { width: 64px; height: 64px; flex: none; }
     h1 { margin: 0; font: 400 clamp(34px, 9vw, 48px)/1 var(--display); letter-spacing: .04em; color: var(--gold); }
     .sub { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
-    main { max-width: 720px; margin: 0 auto; padding: 16px 16px 48px; display: grid; gap: 16px; }
+    main { max-width: 720px; margin: 0 auto; padding: 16px max(16px, env(safe-area-inset-right)) calc(48px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
     section { background: var(--blue-card); border-radius: var(--radius); padding: 16px; }
     h2 { margin: 0 0 12px; font: 400 26px/1 var(--display); letter-spacing: .05em; color: var(--gold); }
 
@@ -46,17 +48,18 @@
 
     label.field { display: block; font-size: 13px; color: var(--muted); margin-bottom: 12px; }
     input[type=text], input[type=date], select {
-      display: block; width: 100%; margin-top: 4px; padding: 11px 12px; font: inherit; color: var(--white);
-      background: var(--blue-deep); border: 2px solid transparent; border-radius: 10px;
+      display: block; width: 100%; min-height: 48px; margin-top: 4px; padding: 11px 12px; font: inherit; color: var(--white);
+      background: var(--blue-deep); border: 2px solid transparent; border-radius: 10px; -webkit-appearance: none; appearance: none;
     }
+    select { background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 20px) 50%, calc(100% - 14px) 50%; background-size: 6px 6px; background-repeat: no-repeat; padding-right: 36px; }
     input:focus, select:focus { outline: none; border-color: var(--gold); }
     input[type=date] { color-scheme: dark; }
 
-    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 14px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 16px; }
     .chip { position: relative; }
     .chip input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
     .chip span {
-      display: block; padding: 9px 14px; border-radius: 999px; background: var(--blue-deep);
+      display: flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: 999px; background: var(--blue-deep);
       border: 2px solid var(--muted); color: var(--muted); font-weight: 600; user-select: none;
     }
     .chip input:checked + span { background: var(--gold); border-color: var(--gold); color: var(--blue-deep); }
@@ -64,34 +67,35 @@
 
     button {
       font: 400 22px/1 var(--display); letter-spacing: .06em; border: 0; border-radius: 10px;
-      padding: 12px 18px; cursor: pointer; background: var(--gold); color: var(--blue-deep);
+      min-height: 48px; padding: 0 18px; cursor: pointer; background: var(--gold); color: var(--blue-deep);
+      touch-action: manipulation;
     }
-    button:hover { background: var(--gold-soft); }
+    @media (hover: hover) { button:hover { background: var(--gold-soft); } }
     button:disabled { opacity: .5; cursor: wait; }
     button.big { width: 100%; }
-    button.ghost { background: transparent; color: var(--muted); border: 2px solid var(--muted); font-size: 18px; padding: 8px 12px; }
-    button.ghost:hover { background: transparent; color: var(--white); border-color: var(--white); }
+    button.ghost { background: transparent; color: var(--muted); border: 2px solid var(--muted); font-size: 18px; min-height: 44px; padding: 0 14px; }
+    @media (hover: hover) { button.ghost:hover { background: transparent; color: var(--white); border-color: var(--white); } }
     .row { display: flex; gap: 8px; }
-    .row input { margin-top: 0; }
+    .row input { margin-top: 0; flex: 1; min-width: 0; }
 
     table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 9px 6px; text-align: right; border-bottom: 1px solid rgba(255,255,255,.12); }
+    th, td { padding: 12px 6px; text-align: right; border-bottom: 1px solid rgba(255,255,255,.12); }
     th:first-child, td:first-child { text-align: left; }
     th { color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
     td:first-child { font-weight: 600; }
     .pos { color: var(--gold-soft); font-weight: 700; }
     .neg { color: var(--bad); font-weight: 700; }
     .hint { margin: 10px 0 0; color: var(--muted); font-size: 13px; }
-    .hint a { color: var(--gold-soft); }
+    .hint a { color: var(--gold-soft); display: inline-block; padding: 10px 6px; margin: -10px -6px; }
 
     ul.matches { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-    ul.matches li { background: var(--blue-deep); border-radius: 10px; padding: 12px; display: flex; gap: 12px; align-items: flex-start; }
-    .m-body { flex: 1; min-width: 0; }
-    .m-date { font: 400 22px/1 var(--display); letter-spacing: .04em; }
-    .m-paid { color: var(--gold-soft); font-weight: 600; margin: 2px 0; }
-    .m-players { color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
+    ul.matches li { background: var(--blue-deep); border-radius: 10px; padding: 12px; display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: center; }
+    .actions { display: flex; gap: 8px; }
+    .row { align-items: stretch; }
+    .m-body { flex: 1 1 120px; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+    .m-players { color: var(--muted); font-size: 14px; font-weight: 400; }
     .empty { color: var(--muted); margin: 0; }
-    .error { background: #7a1f1f; color: var(--white); padding: 10px 14px; border-radius: 10px; }
+    .error { position: sticky; top: 8px; z-index: 10; background: #7a1f1f; color: var(--white); padding: 12px 14px; border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,.4); }
     [hidden] { display: none !important; }
   </style>
 </head>
@@ -111,7 +115,7 @@
       </svg>
       <div>
         <h1>Taconazo</h1>
-        <p class="sub">Cassa partite · <span id="cost">90 €</span> a partita</p>
+        <p class="sub">Cassa partite · quota standard <span id="cost">90 €</span></p>
       </div>
     </div>
   </header>
@@ -137,6 +141,9 @@
         <label class="field">Chi ha pagato
           <select id="payer" required></select>
         </label>
+        <label class="field">Importo (€)
+          <input type="text" id="amount" inputmode="decimal" autocomplete="off" required>
+        </label>
         <button class="big" type="submit">Salva pagamento</button>
       </form>
       <p class="hint" id="last" hidden></p>
@@ -145,7 +152,7 @@
     <section>
       <h2>Saldi</h2>
       <div id="standings"></div>
-      <p class="hint">Saldo = saldo iniziale + quanto hai anticipato − la tua quota (90 € divisi tra chi ha giocato). Chi è più in negativo deve pagare per primo.</p>
+      <p class="hint">Saldo = saldo iniziale + quanto hai anticipato − la tua quota (l'importo diviso tra chi ha giocato). Chi è più in negativo deve pagare per primo.</p>
     </section>
 
     <section>
@@ -223,13 +230,14 @@
     function standings() {
       const rows = new Map(state.players.map((p) => [p.id, { player: p, played: 0, paid: 0, balance: p.opening || 0 }]));
       for (const m of state.matches) {
-        const share = state.cost / m.playerIds.length;
+        const amount = m.amount ?? state.cost; // i pagamenti vecchi non hanno importo: valgono la quota standard
+        const share = amount / m.playerIds.length;
         for (const id of m.playerIds) {
           const r = rows.get(id);
           if (r) { r.played++; r.balance -= share; }
         }
         const payer = rows.get(m.payerId);
-        if (payer) { payer.paid++; payer.balance += state.cost; }
+        if (payer) { payer.paid++; payer.balance += amount; }
       }
       return [...rows.values()]
         .filter((r) => r.player.active || r.played || r.paid || r.player.opening)
@@ -288,23 +296,21 @@
         return;
       }
       $('standings').replaceChildren(h('table', {},
-        h('thead', {}, h('tr', {}, ...['Giocatore', 'Giocate', 'Pagate', 'Saldo'].map((t) => h('th', {}, t)))),
+        h('thead', {}, h('tr', {}, ...['Giocatore', 'Saldo'].map((t) => h('th', {}, t)))),
         h('tbody', {}, ...rows.map((r) => h('tr', {},
           h('td', {}, r.player.name + (r.player.active ? '' : ' (ex)')),
-          h('td', {}, String(r.played)),
-          h('td', {}, String(r.paid)),
           h('td', { class: cls(r.balance) }, money(r.balance)),
         ))),
       ));
     }
 
     function renderLast(byId) {
-      const last = [...state.matches].sort((a, b) => a.date.localeCompare(b.date)).at(-1);
+      const last = state.matches.at(-1); // l'ultimo inserito, non l'ultimo per data
       $('last').hidden = !last;
       if (!last) return;
       const date = dateFmt.format(new Date(last.date + 'T00:00:00Z'));
       $('last').replaceChildren(
-        `Ultimo pagamento: ${date} · ${byId.get(last.payerId)?.name ?? '?'} `,
+        `Ultimo pagamento: ${date} · ${byId.get(last.payerId)?.name ?? '?'} · ${euro.format(last.amount ?? state.cost)} `,
         h('a', { href: '#', onclick: (e) => {
           e.preventDefault();
           if (confirm('Annullare l\'ultimo pagamento?')) act('deleteMatch', { id: last.id });
@@ -318,6 +324,7 @@
           p.name,
           h('div', { class: 'm-players' }, `Saldo iniziale ${money(p.opening || 0)}`),
         ),
+        h('div', { class: 'actions' },
         h('button', { class: 'ghost', 'aria-label': `Saldo iniziale di ${p.name}`, onclick: (e) => {
           const raw = prompt(`Saldo iniziale di ${p.name} in € (negativo = deve dare)`, String(p.opening || 0));
           if (raw === null) return;
@@ -326,6 +333,7 @@
         h('button', { class: 'ghost', 'aria-label': `Rimuovi ${p.name}`, onclick: (e) => {
           if (confirm(`Rimuovere ${p.name}? Lo storico resta.`)) act('removePlayer', { id: p.id }, e.currentTarget);
         } }, 'Rimuovi'),
+        ),
       )));
     }
 
@@ -335,8 +343,9 @@
         date: $('date').value,
         payerId: $('payer').value,
         playerIds: [...selected],
+        amount: $('amount').value.trim().replace(',', '.'),
       }, e.submitter);
-      if (ok) { selected.clear(); $('payer').value = ''; render(); }
+      if (ok) { selected.clear(); $('payer').value = ''; $('amount').value = state.cost; render(); }
     });
 
     $('playerForm').addEventListener('submit', async (e) => {
@@ -348,7 +357,7 @@
     const today = new Date();
     $('date').value = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 
-    refresh();
+    refresh().then(() => { $('amount').value = state.cost; });
     setInterval(refresh, 30000);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
   </script>
