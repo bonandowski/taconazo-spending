@@ -1,7 +1,10 @@
-import { put, head, BlobNotFoundError } from '@vercel/blob';
+import { put, list, del } from '@vercel/blob';
 import { readFile, writeFile } from 'node:fs/promises';
 
-const KEY = 'taconazo/state.json';
+// Ogni salvataggio è un file nuovo (mai sovrascritto): sovrascrivere lo stesso
+// percorso lascia la CDN a servire per un po' la versione vecchia.
+const PREFIX = 'taconazo/state/';
+const KEEP_VERSIONS = 20;
 const LOCAL_FILE = process.env.TACONAZO_LOCAL_FILE; // solo per provare in locale senza Blob
 
 const emptyState = () => ({ cost: 90, players: [], matches: [] });
@@ -21,27 +24,30 @@ async function load() {
       return emptyState();
     }
   }
-  try {
-    const meta = await head(KEY);
-    const res = await fetch(`${meta.url}?t=${Date.now()}`, { cache: 'no-store' });
-    if (!res.ok) throw new Error(`Lettura dati fallita (${res.status})`);
-    return await res.json();
-  } catch (err) {
-    if (err instanceof BlobNotFoundError) return emptyState();
-    throw err;
-  }
+  const { blobs } = await list({ prefix: PREFIX, limit: 1000 });
+  if (blobs.length === 0) return emptyState();
+  const latest = blobs.reduce((a, b) => (a.pathname > b.pathname ? a : b));
+  const res = await fetch(latest.url, { cache: 'no-store' });
+  if (!res.ok) throw new Error(`Lettura dati fallita (${res.status})`);
+  return res.json();
 }
 
 async function save(state) {
   const body = JSON.stringify(state);
   if (LOCAL_FILE) return writeFile(LOCAL_FILE, body);
-  await put(KEY, body, {
+  await put(`${PREFIX}${String(Date.now()).padStart(15, '0')}.json`, body, {
     access: 'public',
     contentType: 'application/json',
     addRandomSuffix: false,
-    allowOverwrite: true,
-    cacheControlMaxAge: 60,
   });
+  // Teniamo le ultime versioni come copia di sicurezza; la pulizia non deve far fallire il salvataggio.
+  try {
+    const { blobs } = await list({ prefix: PREFIX, limit: 1000 });
+    const old = blobs.sort((a, b) => b.pathname.localeCompare(a.pathname)).slice(KEEP_VERSIONS);
+    if (old.length) await del(old.map((b) => b.url));
+  } catch (err) {
+    console.error('Pulizia vecchie versioni fallita', err);
+  }
 }
 
 const newId = () => Math.random().toString(36).slice(2, 8) + Date.now().toString(36);
