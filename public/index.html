@@ -82,6 +82,7 @@
     .pos { color: var(--gold-soft); font-weight: 700; }
     .neg { color: var(--bad); font-weight: 700; }
     .hint { margin: 10px 0 0; color: var(--muted); font-size: 13px; }
+    .hint a { color: var(--gold-soft); }
 
     ul.matches { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
     ul.matches li { background: var(--blue-deep); border-radius: 10px; padding: 12px; display: flex; gap: 12px; align-items: flex-start; }
@@ -126,9 +127,9 @@
     </section>
 
     <section>
-      <h2>Nuova partita</h2>
+      <h2>Nuovo pagamento</h2>
       <form id="matchForm">
-        <label class="field">Data
+        <label class="field">Data pagamento
           <input type="date" id="date" required>
         </label>
         <div class="field" style="margin-bottom:0">Chi ha giocato</div>
@@ -136,19 +137,15 @@
         <label class="field">Chi ha pagato
           <select id="payer" required></select>
         </label>
-        <button class="big" type="submit">Salva partita</button>
+        <button class="big" type="submit">Salva pagamento</button>
       </form>
+      <p class="hint" id="last" hidden></p>
     </section>
 
     <section>
       <h2>Saldi</h2>
       <div id="standings"></div>
       <p class="hint">Saldo = saldo iniziale + quanto hai anticipato − la tua quota (90 € divisi tra chi ha giocato). Chi è più in negativo deve pagare per primo.</p>
-    </section>
-
-    <section>
-      <h2>Partite</h2>
-      <ul class="matches" id="matches"></ul>
     </section>
 
     <section>
@@ -251,7 +248,7 @@
       renderNext();
       renderForm(active);
       renderStandings();
-      renderMatches(byId);
+      renderLast(byId);
       renderRoster(active);
     }
 
@@ -301,23 +298,18 @@
       ));
     }
 
-    function renderMatches(byId) {
-      const name = (id) => byId.get(id)?.name ?? '?';
-      const list = [...state.matches].sort((a, b) => b.date.localeCompare(a.date));
-      if (list.length === 0) {
-        $('matches').replaceChildren(h('li', {}, h('p', { class: 'empty' }, 'Nessuna partita registrata.')));
-        return;
-      }
-      $('matches').replaceChildren(...list.map((m) => h('li', {},
-        h('div', { class: 'm-body' },
-          h('div', { class: 'm-date' }, dateFmt.format(new Date(m.date + 'T00:00:00Z'))),
-          h('div', { class: 'm-paid' }, `Ha pagato ${name(m.payerId)}`),
-          h('div', { class: 'm-players' }, `${m.playerIds.length} giocatori: ${m.playerIds.map(name).join(', ')}`),
-        ),
-        h('button', { class: 'ghost', 'aria-label': 'Elimina partita', onclick: (e) => {
-          if (confirm('Eliminare questa partita?')) act('deleteMatch', { id: m.id }, e.currentTarget);
-        } }, 'Elimina'),
-      )));
+    function renderLast(byId) {
+      const last = [...state.matches].sort((a, b) => a.date.localeCompare(b.date)).at(-1);
+      $('last').hidden = !last;
+      if (!last) return;
+      const date = dateFmt.format(new Date(last.date + 'T00:00:00Z'));
+      $('last').replaceChildren(
+        `Ultimo pagamento: ${date} · ${byId.get(last.payerId)?.name ?? '?'} `,
+        h('a', { href: '#', onclick: (e) => {
+          e.preventDefault();
+          if (confirm('Annullare l\'ultimo pagamento?')) act('deleteMatch', { id: last.id });
+        } }, 'Annulla'),
+      );
     }
 
     function renderRoster(active) {
