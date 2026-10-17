@@ -143,7 +143,7 @@
     <section>
       <h2>Saldi</h2>
       <div id="standings"></div>
-      <p class="hint">Saldo = quanto hai anticipato − la tua quota (90 € divisi tra chi ha giocato). Chi è più in negativo deve pagare per primo.</p>
+      <p class="hint">Saldo = saldo iniziale + quanto hai anticipato − la tua quota (90 € divisi tra chi ha giocato). Chi è più in negativo deve pagare per primo.</p>
     </section>
 
     <section>
@@ -224,7 +224,7 @@
     }
 
     function standings() {
-      const rows = new Map(state.players.map((p) => [p.id, { player: p, played: 0, paid: 0, balance: 0 }]));
+      const rows = new Map(state.players.map((p) => [p.id, { player: p, played: 0, paid: 0, balance: p.opening || 0 }]));
       for (const m of state.matches) {
         const share = state.cost / m.playerIds.length;
         for (const id of m.playerIds) {
@@ -235,7 +235,7 @@
         if (payer) { payer.paid++; payer.balance += state.cost; }
       }
       return [...rows.values()]
-        .filter((r) => r.player.active || r.played || r.paid)
+        .filter((r) => r.player.active || r.played || r.paid || r.player.opening)
         .sort((a, b) => a.balance - b.balance || a.paid - b.paid || a.player.name.localeCompare(b.player.name, 'it'));
     }
 
@@ -257,11 +257,11 @@
 
     function renderNext() {
       const rows = standings().filter((r) => r.player.active);
-      $('next').hidden = state.matches.length === 0 || rows.length === 0;
+      $('next').hidden = !rows.some((r) => Math.abs(r.balance) > 0.004);
       if ($('next').hidden) return;
       const top = rows[0];
       $('nextWho').textContent = top.player.name;
-      $('nextWhy').textContent = `Saldo ${money(top.balance)} · ha pagato ${top.paid} ${top.paid === 1 ? 'volta' : 'volte'}`;
+      $('nextWhy').textContent = `Saldo ${money(top.balance)}`;
     }
 
     function renderForm(active) {
@@ -322,7 +322,15 @@
 
     function renderRoster(active) {
       $('roster').replaceChildren(...active.map((p) => h('li', {},
-        h('div', { class: 'm-body' }, p.name),
+        h('div', { class: 'm-body' },
+          p.name,
+          h('div', { class: 'm-players' }, `Saldo iniziale ${money(p.opening || 0)}`),
+        ),
+        h('button', { class: 'ghost', 'aria-label': `Saldo iniziale di ${p.name}`, onclick: (e) => {
+          const raw = prompt(`Saldo iniziale di ${p.name} in € (negativo = deve dare)`, String(p.opening || 0));
+          if (raw === null) return;
+          act('setOpening', { id: p.id, opening: raw.trim().replace(',', '.') }, e.currentTarget);
+        } }, 'Saldo'),
         h('button', { class: 'ghost', 'aria-label': `Rimuovi ${p.name}`, onclick: (e) => {
           if (confirm(`Rimuovere ${p.name}? Lo storico resta.`)) act('removePlayer', { id: p.id }, e.currentTarget);
         } }, 'Rimuovi'),

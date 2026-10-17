@@ -46,15 +46,34 @@ async function save(state) {
 
 const newId = () => Math.random().toString(36).slice(2, 8) + Date.now().toString(36);
 
+// Saldo di partenza (in euro) per chi arriva da un conteggio fatto altrove.
+function parseOpening(value) {
+  if (value === undefined || value === null || value === '') return 0;
+  const n = Number(value);
+  if (!Number.isFinite(n) || Math.abs(n) > 10000) throw new HttpError(400, 'Saldo iniziale non valido');
+  return Math.round(n * 100) / 100;
+}
+
 const ACTIONS = {
-  addPlayer(state, { name }) {
+  addPlayer(state, { name, opening }) {
     const clean = String(name ?? '').trim().replace(/\s+/g, ' ');
     if (!clean) throw new HttpError(400, 'Scrivi un nome');
     if (clean.length > 30) throw new HttpError(400, 'Nome troppo lungo');
+    const startBalance = parseOpening(opening);
     const existing = state.players.find((p) => p.name.toLowerCase() === clean.toLowerCase());
     if (existing?.active) throw new HttpError(400, 'Esiste già un giocatore con questo nome');
-    if (existing) existing.active = true;
-    else state.players.push({ id: newId(), name: clean, active: true });
+    if (existing) {
+      existing.active = true;
+      existing.opening = startBalance;
+    } else {
+      state.players.push({ id: newId(), name: clean, active: true, opening: startBalance });
+    }
+  },
+
+  setOpening(state, { id, opening }) {
+    const player = state.players.find((p) => p.id === id);
+    if (!player) throw new HttpError(404, 'Giocatore non trovato');
+    player.opening = parseOpening(opening);
   },
 
   // Il giocatore resta nello storico: lo nascondiamo soltanto dalle nuove partite.
