@@ -1,0 +1,13 @@
+{
+  "name": "taconazo-spending",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Cassa partite della squadra: chi gioca, chi paga",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@vercel/blob": "^2.0.0"
+  }
+}

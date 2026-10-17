@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b2f6b">
+  <title>Taconazo · Cassa partite</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%230b2f6b'/%3E%3Crect y='36' width='100' height='28' fill='%23f6b800'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue: #0b2f6b;
+      --blue-deep: #071f48;
+      --blue-card: #123b82;
+      --gold: #f6b800;
+      --gold-soft: #ffd24d;
+      --white: #ffffff;
+      --muted: #b5c6e6;
+      --bad: #ff9a8f;
+      --radius: 14px;
+      --display: 'Bebas Neue', Impact, 'Haettenschweiler', 'Arial Narrow Bold', sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--blue-deep);
+      color: var(--white);
+      font: 16px/1.4 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+    .band { height: 22px; background: linear-gradient(var(--blue) 0 28%, var(--gold) 28% 72%, var(--blue) 72%); }
+    header { background: var(--blue); padding: 16px 16px 14px; }
+    .brand { max-width: 720px; margin: 0 auto; display: flex; align-items: center; gap: 14px; }
+    .brand svg { width: 64px; height: 64px; flex: none; }
+    h1 { margin: 0; font: 400 clamp(34px, 9vw, 48px)/1 var(--display); letter-spacing: .04em; color: var(--gold); }
+    .sub { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+    main { max-width: 720px; margin: 0 auto; padding: 16px 16px 48px; display: grid; gap: 16px; }
+    section { background: var(--blue-card); border-radius: var(--radius); padding: 16px; }
+    h2 { margin: 0 0 12px; font: 400 26px/1 var(--display); letter-spacing: .05em; color: var(--gold); }
+
+    .next { background: var(--gold); color: var(--blue-deep); text-align: center; }
+    .next h2 { color: var(--blue); margin-bottom: 4px; }
+    .next .who { font: 400 clamp(40px, 12vw, 64px)/1 var(--display); letter-spacing: .03em; }
+    .next .why { font-size: 14px; opacity: .8; }
+
+    label.field { display: block; font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+    input[type=text], input[type=date], select {
+      display: block; width: 100%; margin-top: 4px; padding: 11px 12px; font: inherit; color: var(--white);
+      background: var(--blue-deep); border: 2px solid transparent; border-radius: 10px;
+    }
+    input:focus, select:focus { outline: none; border-color: var(--gold); }
+    input[type=date] { color-scheme: dark; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 14px; }
+    .chip { position: relative; }
+    .chip input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+    .chip span {
+      display: block; padding: 9px 14px; border-radius: 999px; background: var(--blue-deep);
+      border: 2px solid var(--muted); color: var(--muted); font-weight: 600; user-select: none;
+    }
+    .chip input:checked + span { background: var(--gold); border-color: var(--gold); color: var(--blue-deep); }
+    .chip input:focus-visible + span { outline: 3px solid var(--white); outline-offset: 2px; }
+
+    button {
+      font: 400 22px/1 var(--display); letter-spacing: .06em; border: 0; border-radius: 10px;
+      padding: 12px 18px; cursor: pointer; background: var(--gold); color: var(--blue-deep);
+    }
+    button:hover { background: var(--gold-soft); }
+    button:disabled { opacity: .5; cursor: wait; }
+    button.big { width: 100%; }
+    button.ghost { background: transparent; color: var(--muted); border: 2px solid var(--muted); font-size: 18px; padding: 8px 12px; }
+    button.ghost:hover { background: transparent; color: var(--white); border-color: var(--white); }
+    .row { display: flex; gap: 8px; }
+    .row input { margin-top: 0; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 9px 6px; text-align: right; border-bottom: 1px solid rgba(255,255,255,.12); }
+    th:first-child, td:first-child { text-align: left; }
+    th { color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+    td:first-child { font-weight: 600; }
+    .pos { color: var(--gold-soft); font-weight: 700; }
+    .neg { color: var(--bad); font-weight: 700; }
+    .hint { margin: 10px 0 0; color: var(--muted); font-size: 13px; }
+
+    ul.matches { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+    ul.matches li { background: var(--blue-deep); border-radius: 10px; padding: 12px; display: flex; gap: 12px; align-items: flex-start; }
+    .m-body { flex: 1; min-width: 0; }
+    .m-date { font: 400 22px/1 var(--display); letter-spacing: .04em; }
+    .m-paid { color: var(--gold-soft); font-weight: 600; margin: 2px 0; }
+    .m-players { color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
+    .empty { color: var(--muted); margin: 0; }
+    .error { background: #7a1f1f; color: var(--white); padding: 10px 14px; border-radius: 10px; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="band"></div>
+  <header>
+    <div class="brand">
+      <svg viewBox="0 0 100 100" role="img" aria-label="Stemma Taconazo">
+        <circle cx="50" cy="50" r="48" fill="#0b2f6b" stroke="#f6b800" stroke-width="4"/>
+        <rect x="2" y="36" width="96" height="28" fill="#f6b800"/>
+        <polygon points="30.0,15.0 31.7,19.7 36.7,19.8 32.8,22.9 34.1,27.7 30.0,24.9 25.9,27.7 27.2,22.9 23.3,19.8 28.3,19.7" fill="#f6b800"/>
+        <polygon points="50.0,10.0 51.9,15.3 57.6,15.5 53.1,19.0 54.7,24.5 50.0,21.3 45.3,24.5 46.9,19.0 42.4,15.5 48.1,15.3" fill="#f6b800"/>
+        <polygon points="70.0,15.0 71.7,19.7 76.7,19.8 72.8,22.9 74.1,27.7 70.0,24.9 65.9,27.7 67.2,22.9 63.3,19.8 68.3,19.7" fill="#f6b800"/>
+        <polygon points="30.0,71.0 31.7,75.7 36.7,75.8 32.8,78.9 34.1,83.7 30.0,80.9 25.9,83.7 27.2,78.9 23.3,75.8 28.3,75.7" fill="#f6b800"/>
+        <polygon points="50.0,74.0 51.9,79.3 57.6,79.5 53.1,83.0 54.7,88.5 50.0,85.3 45.3,88.5 46.9,83.0 42.4,79.5 48.1,79.3" fill="#f6b800"/>
+        <polygon points="70.0,71.0 71.7,75.7 76.7,75.8 72.8,78.9 74.1,83.7 70.0,80.9 65.9,83.7 67.2,78.9 63.3,75.8 68.3,75.7" fill="#f6b800"/>
+      </svg>
+      <div>
+        <h1>Taconazo</h1>
+        <p class="sub">Cassa partite · <span id="cost">90 €</span> a partita</p>
+      </div>
+    </div>
+  </header>
+  <div class="band"></div>
+
+  <main>
+    <div class="error" id="error" role="alert" hidden></div>
+
+    <section class="next" id="next" hidden>
+      <h2>Tocca a pagare</h2>
+      <div class="who" id="nextWho"></div>
+      <div class="why" id="nextWhy"></div>
+    </section>
+
+    <section>
+      <h2>Nuova partita</h2>
+      <form id="matchForm">
+        <label class="field">Data
+          <input type="date" id="date" required>
+        </label>
+        <div class="field" style="margin-bottom:0">Chi ha giocato</div>
+        <div class="chips" id="chips"></div>
+        <label class="field">Chi ha pagato
+          <select id="payer" required></select>
+        </label>
+        <button class="big" type="submit">Salva partita</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>Saldi</h2>
+      <div id="standings"></div>
+      <p class="hint">Saldo = quanto hai anticipato − la tua quota (90 € divisi tra chi ha giocato). Chi è più in negativo deve pagare per primo.</p>
+    </section>
+
+    <section>
+      <h2>Partite</h2>
+      <ul class="matches" id="matches"></ul>
+    </section>
+
+    <section>
+      <h2>Giocatori</h2>
+      <form class="row" id="playerForm">
+        <input type="text" id="playerName" placeholder="Nome nuovo giocatore" maxlength="30" autocomplete="off" aria-label="Nome nuovo giocatore">
+        <button type="submit">Aggiungi</button>
+      </form>
+      <ul class="matches" id="roster" style="margin-top:12px"></ul>
+    </section>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const euro = new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' });
+    const dateFmt = new Intl.DateTimeFormat('it-IT', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+
+    let state = { cost: 90, players: [], matches: [] };
+    let selected = new Set();
+
+    // Costruisce nodi DOM senza innerHTML: i nomi li scrive chiunque.
+    function h(tag, props = {}, ...children) {
+      const el = document.createElement(tag);
+      for (const [k, v] of Object.entries(props)) {
+        if (k === 'class') el.className = v;
+        else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+        else el.setAttribute(k, v);
+      }
+      el.append(...children);
+      return el;
+    }
+
+    function showError(msg) {
+      const box = $('error');
+      box.textContent = msg || '';
+      box.hidden = !msg;
+    }
+
+    async function api(method, body) {
+      const res = await fetch('/api/state', {
+        method,
+        headers: body ? { 'Content-Type': 'application/json' } : undefined,
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Qualcosa è andato storto');
+      return data;
+    }
+
+    async function act(action, args, button) {
+      if (button) button.disabled = true;
+      try {
+        state = await api('POST', { action, ...args });
+        showError('');
+        render();
+        return true;
+      } catch (err) {
+        showError(err.message);
+        return false;
+      } finally {
+        if (button) button.disabled = false;
+      }
+    }
+
+    async function refresh() {
+      try {
+        state = await api('GET');
+        showError('');
+        render();
+      } catch (err) {
+        showError(err.message);
+      }
+    }
+
+    function standings() {
+      const rows = new Map(state.players.map((p) => [p.id, { player: p, played: 0, paid: 0, balance: 0 }]));
+      for (const m of state.matches) {
+        const share = state.cost / m.playerIds.length;
+        for (const id of m.playerIds) {
+          const r = rows.get(id);
+          if (r) { r.played++; r.balance -= share; }
+        }
+        const payer = rows.get(m.payerId);
+        if (payer) { payer.paid++; payer.balance += state.cost; }
+      }
+      return [...rows.values()]
+        .filter((r) => r.player.active || r.played || r.paid)
+        .sort((a, b) => a.balance - b.balance || a.paid - b.paid || a.player.name.localeCompare(b.player.name, 'it'));
+    }
+
+    const money = (n) => (Math.abs(n) < 0.005 ? euro.format(0) : (n > 0 ? '+' : '−') + euro.format(Math.abs(n)));
+    const cls = (n) => (n > 0.004 ? 'pos' : n < -0.004 ? 'neg' : '');
+
+    function render() {
+      $('cost').textContent = euro.format(state.cost).replace(',00', '');
+      const active = state.players.filter((p) => p.active);
+      const byId = new Map(state.players.map((p) => [p.id, p]));
+      selected = new Set([...selected].filter((id) => byId.get(id)?.active));
+
+      renderNext();
+      renderForm(active);
+      renderStandings();
+      renderMatches(byId);
+      renderRoster(active);
+    }
+
+    function renderNext() {
+      const rows = standings().filter((r) => r.player.active);
+      $('next').hidden = state.matches.length === 0 || rows.length === 0;
+      if ($('next').hidden) return;
+      const top = rows[0];
+      $('nextWho').textContent = top.player.name;
+      $('nextWhy').textContent = `Saldo ${money(top.balance)} · ha pagato ${top.paid} ${top.paid === 1 ? 'volta' : 'volte'}`;
+    }
+
+    function renderForm(active) {
+      const chips = $('chips');
+      chips.replaceChildren(...active.map((p) => {
+        const input = h('input', { type: 'checkbox', onchange: (e) => {
+          e.target.checked ? selected.add(p.id) : selected.delete(p.id);
+        } });
+        input.checked = selected.has(p.id);
+        return h('label', { class: 'chip' }, input, h('span', {}, p.name));
+      }));
+      if (active.length === 0) chips.append(h('p', { class: 'empty' }, 'Aggiungi prima i giocatori (in fondo alla pagina).'));
+
+      const payer = $('payer');
+      const current = payer.value;
+      payer.replaceChildren(
+        h('option', { value: '' }, 'Scegli…'),
+        ...active.map((p) => h('option', { value: p.id }, p.name)),
+      );
+      if (active.some((p) => p.id === current)) payer.value = current;
+    }
+
+    function renderStandings() {
+      const rows = standings();
+      if (rows.length === 0) {
+        $('standings').replaceChildren(h('p', { class: 'empty' }, 'Nessun giocatore ancora.'));
+        return;
+      }
+      $('standings').replaceChildren(h('table', {},
+        h('thead', {}, h('tr', {}, ...['Giocatore', 'Giocate', 'Pagate', 'Saldo'].map((t) => h('th', {}, t)))),
+        h('tbody', {}, ...rows.map((r) => h('tr', {},
+          h('td', {}, r.player.name + (r.player.active ? '' : ' (ex)')),
+          h('td', {}, String(r.played)),
+          h('td', {}, String(r.paid)),
+          h('td', { class: cls(r.balance) }, money(r.balance)),
+        ))),
+      ));
+    }
+
+    function renderMatches(byId) {
+      const name = (id) => byId.get(id)?.name ?? '?';
+      const list = [...state.matches].sort((a, b) => b.date.localeCompare(a.date));
+      if (list.length === 0) {
+        $('matches').replaceChildren(h('li', {}, h('p', { class: 'empty' }, 'Nessuna partita registrata.')));
+        return;
+      }
+      $('matches').replaceChildren(...list.map((m) => h('li', {},
+        h('div', { class: 'm-body' },
+          h('div', { class: 'm-date' }, dateFmt.format(new Date(m.date + 'T00:00:00Z'))),
+          h('div', { class: 'm-paid' }, `Ha pagato ${name(m.payerId)}`),
+          h('div', { class: 'm-players' }, `${m.playerIds.length} giocatori: ${m.playerIds.map(name).join(', ')}`),
+        ),
+        h('button', { class: 'ghost', 'aria-label': 'Elimina partita', onclick: (e) => {
+          if (confirm('Eliminare questa partita?')) act('deleteMatch', { id: m.id }, e.currentTarget);
+        } }, 'Elimina'),
+      )));
+    }
+
+    function renderRoster(active) {
+      $('roster').replaceChildren(...active.map((p) => h('li', {},
+        h('div', { class: 'm-body' }, p.name),
+        h('button', { class: 'ghost', 'aria-label': `Rimuovi ${p.name}`, onclick: (e) => {
+          if (confirm(`Rimuovere ${p.name}? Lo storico resta.`)) act('removePlayer', { id: p.id }, e.currentTarget);
+        } }, 'Rimuovi'),
+      )));
+    }
+
+    $('matchForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const ok = await act('addMatch', {
+        date: $('date').value,
+        payerId: $('payer').value,
+        playerIds: [...selected],
+      }, e.submitter);
+      if (ok) { selected.clear(); $('payer').value = ''; render(); }
+    });
+
+    $('playerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const ok = await act('addPlayer', { name: $('playerName').value }, e.submitter);
+      if (ok) $('playerName').value = '';
+    });
+
+    const today = new Date();
+    $('date').value = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+
+    refresh();
+    setInterval(refresh, 30000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+  </script>
+</body>
+</html>
